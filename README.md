@@ -86,7 +86,7 @@ pip install chromadb sentence-transformers
 import sys
 sys.path.insert(0, "/path/to/repo")
 
-from .claude.tools.temporal_memory import TemporalKnowledgeGraph, EntityType
+from claude.tools.temporal_memory import TemporalKnowledgeGraph, EntityType
 
 # Initialize TKG
 tkg = TemporalKnowledgeGraph()
@@ -113,7 +113,7 @@ last_opt = tkg.when_was_last("model optimization")
 ### 3. Use Real Optimization Pipeline
 
 ```python
-from .claude.tools.amazon_robotics import OptimizationPipeline
+from claude.tools.amazon_robotics import OptimizationPipeline
 import torch
 
 # Initialize pipeline
@@ -145,7 +145,7 @@ print(f"Success: {results['overall_success']}")
 ### 4. Use Workflow Orchestration
 
 ```python
-from .claude.tools.orchestration import MetaOptimizerWorkflow
+from claude.tools.orchestration import MetaOptimizerWorkflow
 
 # Initialize workflow
 workflow = MetaOptimizerWorkflow()
@@ -218,7 +218,7 @@ strategies = {
 }
 
 # Custom strategy
-from .claude.tools.amazon_robotics import OptimizationStrategy
+from claude.tools.amazon_robotics import OptimizationStrategy
 
 custom = OptimizationStrategy(
     name="Custom Strategy",
@@ -245,7 +245,7 @@ print(stats)
 
 # Test Optimizer
 import torch
-from .claude.tools.amazon_robotics import RealQuantizer, QuantizationConfig
+from claude.tools.amazon_robotics import RealQuantizer, QuantizationConfig
 
 quantizer = RealQuantizer(QuantizationConfig(method="dynamic_int8"))
 model = torch.nn.Linear(10, 5)
@@ -254,7 +254,7 @@ result = quantizer.quantize(model, test_input)
 print(result.to_dict())
 
 # Test Workflow
-from .claude.tools.orchestration import MetaOptimizerWorkflow
+from claude.tools.orchestration import MetaOptimizerWorkflow
 workflow = MetaOptimizerWorkflow()
 print(workflow.visualize_workflow())
 ```

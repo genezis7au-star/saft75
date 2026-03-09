@@ -174,7 +174,7 @@ class OptimizationPipeline:
             quantizer = RealQuantizer(
                 QuantizationConfig(method=strat.quantization_type)
             )
-            qr = quantizer.quantize(current_model, test_input, method=strat.quantization_type)
+            qr = quantizer.quantize(current_model, test_input)
             result.quantization_result = qr.to_dict()
             if qr.success:
                 current_model = qr.quantized_model
