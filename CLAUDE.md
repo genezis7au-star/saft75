@@ -9,7 +9,9 @@ as source under `.claude/tools/` rather than a conventional top-level package:
 
 1. **Temporal Knowledge Graph (TKG) memory** — graph + vector hybrid storage for
    cross-session knowledge, with temporal queries ("what changed since last week?").
-2. **Real model optimization pipeline** — actual PyTorch quantization (INT8/INT4),
+2. **Real model optimization pipeline** — actual PyTorch quantization (real INT8 via
+   `torch.quantization`; INT4 is simulated by rounding weights to 16 levels and storing
+   them back as float, not true INT4 storage/kernels — see `quantizer.py::_int4_weight_only`),
    pruning (structured/unstructured), and ONNX/TensorRT export, not placeholders.
 3. **Workflow orchestration** — a small LangGraph-inspired explicit state machine with
    conditional routing, retry/error recovery, and parallel strategy execution.
@@ -48,17 +50,20 @@ another project. See `README.md` for the full usage guide and quick-start exampl
 
 Each subpackage's `__init__.py` is the intended import surface (re-exports the public
 classes/dataclasses via `__all__`) — import from the package, not the submodule, e.g.
-`from .claude.tools.temporal_memory import TemporalKnowledgeGraph`, not
-`from .claude.tools.temporal_memory.tkg_engine import TemporalKnowledgeGraph`.
+`from tools.temporal_memory import TemporalKnowledgeGraph`, not
+`from tools.temporal_memory.tkg_engine import TemporalKnowledgeGraph`.
 
 **Known issue:** `README.md`'s example imports use `from claude.tools.temporal_memory import ...`
 (and similarly for `amazon_robotics` / `orchestration`). This does not work as written —
 the source lives under `.claude/tools/...` (a dot-prefixed directory), which is not
-importable as a `claude` package by adding the repo root to `sys.path`. To actually import
-these modules, either add `.claude` itself to `sys.path` and import `from tools.temporal_memory
-import ...`, or reference the modules by their real relative path. Don't propagate the
-README's `claude.tools...` import path as if it works; if you fix call sites, fix the
-README too rather than leaving the two inconsistent.
+importable as a `claude` package by adding the repo root to `sys.path`; a leading-dot form
+like `from .claude.tools.temporal_memory import ...` is a relative import and fails outside
+a package with `ImportError: attempted relative import with no known parent package`. To
+actually import these modules, add `.claude` itself to `sys.path`
+(`sys.path.insert(0, "<repo>/.claude")`) and import `from tools.temporal_memory import ...`,
+or reference the modules by their real relative path. Don't propagate the README's
+`claude.tools...` import path as if it works; if you fix call sites, fix the README too
+rather than leaving the two inconsistent.
 
 ## Language, Runtime, and Dependencies
 
@@ -67,8 +72,12 @@ README too rather than leaving the two inconsistent.
 - **No `requirements.txt` / `pyproject.toml` / `setup.py` exists yet.** Dependencies are
   documented only in `README.md`:
   - Required: `networkx`, `torch`, `onnx`, `onnxruntime`
-  - Optional: `chromadb`, `sentence-transformers` (enables the ChromaDB vector backend;
-    without it, `vector_store.py`'s in-memory backend is used)
+  - Optional: `chromadb`, `sentence-transformers` — only needed if code explicitly passes
+    `vector_backend="chromadb"` to `TemporalKnowledgeGraph` (or calls
+    `create_vector_store(backend="chromadb")` directly). The default `"memory"` backend
+    (`InMemoryVectorStore`) needs neither and is what's used unless `"chromadb"` is
+    requested. There is no automatic runtime fallback: requesting `"chromadb"` without the
+    package installed raises `ImportError` rather than silently falling back to in-memory.
   - If you add real dependency management, create a `requirements.txt` (or
     `pyproject.toml`) and update both this file and `README.md`'s install section.
 
@@ -78,10 +87,12 @@ Follow the patterns already established in `.claude/tools/`:
 
 - `from __future__ import annotations` at the top of every module.
 - Full type hints on public functions/methods (`Optional`, `Dict[str, Any]`, etc.).
-- Configuration and results are `@dataclass`es with a `to_dict()` method (see
-  `QuantizationConfig`/`QuantizationResult` in `quantizer.py`, `PipelineResult` in
-  `real_optimizer.py`) — follow this pattern for new config/result types rather than
-  plain dicts.
+- Config and result types are `@dataclass`es, but only **result** dataclasses carry a
+  `to_dict()` method for serialization (see `QuantizationResult` in `quantizer.py`,
+  `PruningResult` in `pruner.py`, `ExportResult` in `exporter.py`, `PipelineResult` in
+  `real_optimizer.py`). Config dataclasses (`QuantizationConfig`, `PruningConfig`,
+  `ExportConfig`, `OptimizationStrategy`) are plain field containers with no `to_dict()` —
+  follow this config/result split for new dataclasses rather than plain dicts.
 - Enums for fixed categories (`EntityType`, `NodeType`) subclass `str, Enum` so values
   serialize cleanly to JSON and compare equal to plain strings.
 - Google-style docstrings (`Args:` / `Returns:`) on public methods; module-level
