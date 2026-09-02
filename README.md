@@ -168,7 +168,7 @@ print(result['optimization_results'])
 ## 📊 Expected Performance
 
 ### TKG Memory
-- **+26% accuracy** in multi-turn conversations
+- Target: improved multi-turn accuracy (benchmark pending)
 - Target: 90% latency reduction vs full-context re-processing (benchmark pending)
 - **Cross-session synthesis** — "what changed since last week?"
 - **Temporal queries** — "when did we last optimize X?"
