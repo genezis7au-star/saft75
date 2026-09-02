@@ -5,7 +5,7 @@ This file provides guidance to AI assistants (such as Claude) working in this re
 ## Repository Overview
 
 **META-OPTIMIZER v7.0** is a Python toolkit of three loosely-coupled subsystems, delivered
-as source under `.claude/tools/` rather than a conventional top-level package:
+as an installable package under `src/meta_optimizer/`:
 
 1. **Temporal Knowledge Graph (TKG) memory** — graph + vector hybrid storage for
    cross-session knowledge, with temporal queries ("what changed since last week?").
@@ -22,68 +22,49 @@ another project. See `README.md` for the full usage guide and quick-start exampl
 ## Project Structure
 
 ```
-.claude/
-├── tools/
-│   ├── temporal_memory/          # TKG Memory System
-│   │   ├── tkg_engine.py         # TemporalKnowledgeGraph — main public interface
-│   │   ├── graph_store.py        # NetworkXGraphStore, GraphNode, GraphEdge
-│   │   ├── vector_store.py       # VectorDocument, create_vector_store (in-memory/ChromaDB)
-│   │   ├── hybrid_retriever.py   # HybridRetriever — combines graph + vector search
-│   │   └── temporal_query.py     # TemporalQuery — time-aware queries
-│   │
-│   ├── amazon_robotics/          # Real Optimization
-│   │   ├── quantizer.py          # RealQuantizer — PyTorch INT8/INT4 quantization
-│   │   ├── pruner.py             # RealPruner — structured/unstructured pruning
-│   │   ├── exporter.py           # ModelExporter — ONNX/TensorRT export
-│   │   └── real_optimizer.py     # OptimizationPipeline — chains the above; PREDEFINED_STRATEGIES
-│   │
-│   └── orchestration/            # Workflow Engine
-│       ├── workflow_engine.py    # WorkflowEngine, WorkflowNode, MetaOptimizerWorkflow
-│       ├── state_manager.py      # StateManager, WorkflowState — checkpointing
-│       ├── error_handler.py      # ErrorHandler, RetryConfig, ErrorRecord
-│       └── parallel_executor.py  # ParallelExecutor — concurrent strategy execution
-│
-└── data/
-    ├── tkg/                      # Persisted TKG storage (graph.json, vectors.json)
-    └── workflow_states/          # Workflow checkpoints
+src/
+└── meta_optimizer/
+    ├── __init__.py
+    ├── temporal_memory/          # TKG Memory System
+    │   ├── tkg_engine.py         # TemporalKnowledgeGraph — main public interface
+    │   ├── graph_store.py        # NetworkXGraphStore, GraphNode, GraphEdge
+    │   ├── vector_store.py       # VectorDocument, create_vector_store
+    │   ├── hybrid_retriever.py   # HybridRetriever
+    │   └── temporal_query.py     # TemporalQuery
+    ├── amazon_robotics/          # Model Optimization
+    │   ├── quantizer.py          # RealQuantizer — INT8 / simulated INT4
+    │   ├── pruner.py             # RealPruner
+    │   ├── exporter.py           # ModelExporter — ONNX/TensorRT
+    │   └── real_optimizer.py     # OptimizationPipeline
+    └── orchestration/            # Workflow Engine
+        ├── workflow_engine.py    # WorkflowEngine and MetaOptimizerWorkflow
+        ├── state_manager.py      # Checkpointing
+        ├── error_handler.py      # Retry and error records
+        └── parallel_executor.py  # Concurrent strategy execution
 ```
 
-Each subpackage's `__init__.py` is the intended import surface (re-exports the public
-classes/dataclasses via `__all__`) — import from the package, not the submodule, e.g.
-`from tools.temporal_memory import TemporalKnowledgeGraph`, not
-`from tools.temporal_memory.tkg_engine import TemporalKnowledgeGraph`.
+The project is installed as the `meta_optimizer` package. Import public symbols from
+subpackage exports, for example `from meta_optimizer.temporal_memory import TemporalKnowledgeGraph`.
 
-**Known issue:** `README.md`'s example imports use `from claude.tools.temporal_memory import ...`
-(and similarly for `amazon_robotics` / `orchestration`). This does not work as written —
-the source lives under `.claude/tools/...` (a dot-prefixed directory), which is not
-importable as a `claude` package by adding the repo root to `sys.path`; a leading-dot form
-like `from .claude.tools.temporal_memory import ...` is a relative import and fails outside
-a package with `ImportError: attempted relative import with no known parent package`. To
-actually import these modules, add `.claude` itself to `sys.path`
-(`sys.path.insert(0, "<repo>/.claude")`) and import `from tools.temporal_memory import ...`,
-or reference the modules by their real relative path. Don't propagate the README's
-`claude.tools...` import path as if it works; if you fix call sites, fix the README too
-rather than leaving the two inconsistent.
 
 ## Language, Runtime, and Dependencies
 
-- **Language**: Python 3 (uses `from __future__ import annotations`, so 3.7+; f-strings and
-  `dataclasses` are used throughout — target 3.9+ in practice).
-- **No `requirements.txt` / `pyproject.toml` / `setup.py` exists yet.** Dependencies are
-  documented only in `README.md`:
-  - Required: `networkx`, `torch`, `onnx`, `onnxruntime`
-  - Optional: `chromadb`, `sentence-transformers` — only needed if code explicitly passes
-    `vector_backend="chromadb"` to `TemporalKnowledgeGraph` (or calls
-    `create_vector_store(backend="chromadb")` directly). The default `"memory"` backend
-    (`InMemoryVectorStore`) needs neither and is what's used unless `"chromadb"` is
-    requested. There is no automatic runtime fallback: requesting `"chromadb"` without the
-    package installed raises `ImportError` rather than silently falling back to in-memory.
-  - If you add real dependency management, create a `requirements.txt` (or
-    `pyproject.toml`) and update both this file and `README.md`'s install section.
+- **Language**: Python 3.10+.
+- **Packaging**: `pyproject.toml` with a `src/meta_optimizer` package layout.
+- **Core dependency**: `networkx`.
+- **Optional extras**:
+  - `optimization`: PyTorch and NumPy for quantization and pruning.
+  - `onnx`: optimization dependencies plus ONNX and ONNX Runtime.
+  - `chromadb`: ChromaDB and sentence-transformers. The default vector backend remains
+    in-memory; explicitly requesting ChromaDB without this extra raises `ImportError`.
+  - TensorRT is platform-specific and must be installed separately.
+- Install with `pip install -e .`; use extras such as `pip install -e ".[onnx,test]"`
+  for development and smoke testing.
+
 
 ## Code Conventions
 
-Follow the patterns already established in `.claude/tools/`:
+Follow the patterns already established in `src/meta_optimizer/`:
 
 - `from __future__ import annotations` at the top of every module.
 - Full type hints on public functions/methods (`Optional`, `Dict[str, Any]`, etc.).
@@ -114,14 +95,17 @@ General principles regardless of stack:
 
 ## Testing
 
-**There is no test suite in this repository yet** (no `tests/` directory, no `pytest`
-config). `README.md`'s "Testing" section shows ad-hoc smoke-test snippets run manually
-via `python -c "..."` against each module (`TemporalKnowledgeGraph`, `RealQuantizer`,
-`MetaOptimizerWorkflow.visualize_workflow()`), not an automated suite.
+The automated smoke suite is in `tests/test_smoke.py` and exercises the README Quick
+Start paths. GitHub Actions installs the package in a clean environment, verifies the
+core imports, installs the ONNX/test extras, and runs `pytest`.
 
-If you add tests, prefer `pytest` with a top-level `tests/` mirroring the
-`.claude/tools/` layout (`tests/temporal_memory/`, `tests/amazon_robotics/`,
-`tests/orchestration/`), and document the run command here once established.
+Run locally with:
+
+```bash
+pip install -e ".[onnx,test]"
+pytest
+```
+
 
 ## Git Workflow
 
@@ -175,8 +159,7 @@ When working in this repository, AI assistants should:
 ## Updating This File
 
 As the project grows, keep this file in sync with reality:
-- Add a real dependency manifest (`requirements.txt`/`pyproject.toml`) once one exists, and update this file's Dependencies section
-- Document an actual test command once a test suite is added
-- Resolve and document the `claude.tools...` vs `.claude/tools/...` import path inconsistency if/when it's fixed
-- Note any CI/CD pipeline once one is added
-- Record any new subsystem added alongside `temporal_memory`, `amazon_robotics`, and `orchestration`
+- Update `pyproject.toml` and this file when dependencies or extras change.
+- Keep README Quick Start examples covered by `tests/test_smoke.py`.
+- Record material CI/CD changes.
+- Record new subsystems added alongside `temporal_memory`, `amazon_robotics`, and `orchestration`.
