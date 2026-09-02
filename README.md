@@ -1,13 +1,13 @@
 # META-OPTIMIZER v7.0 - WORLD-CLASS EDITION
 
-**Production-Ready AI System with Industry-Leading Components**
+**AI System for Temporal Memory, Model Optimization and Workflow Orchestration**
 
 ## 🚀 What's New in v7.0
 
 ### Three Major Upgrades (Based on 2025 Best Practices)
 
 #### #1: Temporal Knowledge Graph Memory
-- **26% accuracy boost** (industry benchmark from Mem0)
+- Target: accuracy boost from temporal memory (reference point: Mem0 benchmark, not reproduced here)
 - Graph + Vector hybrid storage
 - Temporal tracking (when facts were learned)
 - Cross-session synthesis
@@ -17,16 +17,16 @@
 **Replaces:** Simple JSON storage → NetworkX graph
 
 #### #2: Real Model Optimization Pipeline
-- **REAL PyTorch quantization** (INT8, INT4)
+- PyTorch INT8 quantization and simulated INT4 weight rounding
 - **REAL pruning** (structured/unstructured)
-- **3-5x inference speedup** (measured)
-- **4-10x memory reduction** (validated)
+- Target: 3-5x inference speedup (benchmark pending)
+- Target: 4-10x memory reduction (benchmark pending)
 - ONNX/TensorRT export
-- Production-ready for edge deployment
+- Designed for edge deployment (INT8 + ONNX export)
 
 **Replaces:** Placeholder optimizations → Actual implementations
 
-#### #3: LangGraph-Based Orchestration
+#### #3: LangGraph-Inspired Orchestration
 - Explicit state machines
 - Conditional routing
 - Error recovery mechanisms
@@ -40,53 +40,50 @@
 ## 📁 Architecture
 
 ```
-.claude/
-├── tools/
-│   ├── temporal_memory/          # TKG Memory System
-│   │   ├── tkg_engine.py         # Main interface
-│   │   ├── graph_store.py        # Graph storage (NetworkX)
-│   │   ├── vector_store.py       # Embeddings (ChromaDB/in-memory)
-│   │   ├── hybrid_retriever.py   # Graph + Vector queries
-│   │   └── temporal_query.py     # Time-aware queries
-│   │
-│   ├── amazon_robotics/          # Real Optimization
-│   │   ├── quantizer.py          # PyTorch INT8/INT4
-│   │   ├── pruner.py             # Structured/unstructured pruning
-│   │   ├── exporter.py           # ONNX/TensorRT
-│   │   └── real_optimizer.py     # Integrated pipeline
-│   │
-│   └── orchestration/            # Workflow Engine
-│       ├── workflow_engine.py    # State machine + MetaOptimizerWorkflow
-│       ├── state_manager.py      # State persistence
-│       ├── error_handler.py      # Recovery strategies
-│       └── parallel_executor.py  # Multi-strategy execution
-│
-└── data/
-    ├── tkg/                      # TKG storage
-    └── workflow_states/          # Workflow checkpoints
+src/
+└── meta_optimizer/
+    ├── __init__.py
+    ├── temporal_memory/          # TKG Memory System
+    │   ├── tkg_engine.py         # Main interface
+    │   ├── graph_store.py        # Graph storage (NetworkX)
+    │   ├── vector_store.py       # Embeddings (ChromaDB/in-memory)
+    │   ├── hybrid_retriever.py   # Graph + Vector queries
+    │   └── temporal_query.py     # Time-aware queries
+    ├── amazon_robotics/          # Model Optimization
+    │   ├── quantizer.py          # PyTorch INT8 / simulated INT4
+    │   ├── pruner.py             # Structured/unstructured pruning
+    │   ├── exporter.py           # ONNX/TensorRT
+    │   └── real_optimizer.py     # Integrated pipeline
+    └── orchestration/            # Workflow Engine
+        ├── workflow_engine.py    # State machine + MetaOptimizerWorkflow
+        ├── state_manager.py      # State persistence
+        ├── error_handler.py      # Recovery strategies
+        └── parallel_executor.py  # Multi-strategy execution
 ```
+
+Installed as the `meta_optimizer` package using a `src` layout and `pyproject.toml`.
 
 ---
 
 ## 🎯 Quick Start
 
-### 1. Install Dependencies
+### 1. Install
 
 ```bash
-# Core dependencies (required)
-pip install networkx torch onnx onnxruntime
-
-# Optional (for enhanced features)
-pip install chromadb sentence-transformers
+pip install -e .                    # core: temporal_memory + orchestration (networkx only)
+pip install -e ".[optimization]"    # + PyTorch quantization / pruning
+pip install -e ".[onnx]"            # + ONNX export and onnxruntime validation
+pip install -e ".[chromadb]"        # enables vector_backend="chromadb"; default remains in-memory
+pip install -e ".[all]"             # everything above + pytest
 ```
+
+TensorRT export requires NVIDIA's platform-specific `tensorrt` package; install it separately.
+
 
 ### 2. Use Temporal Knowledge Graph
 
 ```python
-import sys
-sys.path.insert(0, "/path/to/repo")
-
-from claude.tools.temporal_memory import TemporalKnowledgeGraph, EntityType
+from meta_optimizer.temporal_memory import TemporalKnowledgeGraph, EntityType
 
 # Initialize TKG
 tkg = TemporalKnowledgeGraph()
@@ -113,7 +110,7 @@ last_opt = tkg.when_was_last("model optimization")
 ### 3. Use Real Optimization Pipeline
 
 ```python
-from claude.tools.amazon_robotics import OptimizationPipeline
+from meta_optimizer.amazon_robotics import OptimizationPipeline
 import torch
 
 # Initialize pipeline
@@ -145,7 +142,7 @@ print(f"Success: {results['overall_success']}")
 ### 4. Use Workflow Orchestration
 
 ```python
-from claude.tools.orchestration import MetaOptimizerWorkflow
+from meta_optimizer.orchestration import MetaOptimizerWorkflow
 
 # Initialize workflow
 workflow = MetaOptimizerWorkflow()
@@ -171,15 +168,15 @@ print(result['optimization_results'])
 ## 📊 Expected Performance
 
 ### TKG Memory
-- **+26% accuracy** in multi-turn conversations
-- **90% latency reduction** vs full-context re-processing
+- Target: improved multi-turn accuracy (benchmark pending)
+- Target: 90% latency reduction vs full-context re-processing (benchmark pending)
 - **Cross-session synthesis** — "what changed since last week?"
 - **Temporal queries** — "when did we last optimize X?"
 
 ### Real Optimization
-- **3-5x inference speedup** (measured with benchmark)
-- **4-10x memory reduction** (validated)
-- **<3% accuracy drop** (automated validation)
+- Target: 3-5x inference speedup (benchmark pending)
+- Target: 4-10x memory reduction (benchmark pending)
+- Target: <3% accuracy drop (validation harness pending)
 - **<10ms latency target** (edge deployment)
 - **<100MB size target** (edge deployment)
 
@@ -218,7 +215,7 @@ strategies = {
 }
 
 # Custom strategy
-from claude.tools.amazon_robotics import OptimizationStrategy
+from meta_optimizer.amazon_robotics import OptimizationStrategy
 
 custom = OptimizationStrategy(
     name="Custom Strategy",
@@ -234,30 +231,13 @@ custom = OptimizationStrategy(
 
 ## 🧪 Testing
 
-All modules include built-in testing:
-
-```python
-# Test TKG
-tkg = TemporalKnowledgeGraph()
-tkg.add_knowledge("Test entry", EntityType.GENERIC)
-stats = tkg.get_statistics()
-print(stats)
-
-# Test Optimizer
-import torch
-from claude.tools.amazon_robotics import RealQuantizer, QuantizationConfig
-
-quantizer = RealQuantizer(QuantizationConfig(method="dynamic_int8"))
-model = torch.nn.Linear(10, 5)
-test_input = torch.randn(1, 10)
-result = quantizer.quantize(model, test_input)
-print(result.to_dict())
-
-# Test Workflow
-from claude.tools.orchestration import MetaOptimizerWorkflow
-workflow = MetaOptimizerWorkflow()
-print(workflow.visualize_workflow())
+```bash
+pip install -e ".[onnx,test]"
+pytest
 ```
+
+`tests/test_smoke.py` executes the Quick Start examples above. Tests that need
+PyTorch skip automatically when only the core package is installed.
 
 ---
 
@@ -323,4 +303,4 @@ print(f"Migrated {migration_stats['lessons']} lessons")
 
 **Version:** 7.0.0
 **Release Date:** March 9, 2026
-**Status:** Production-Ready ✅
+**Status:** Alpha — packaging and CI smoke tests in place, benchmarks pending
