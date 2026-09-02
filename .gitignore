@@ -1,3 +1,4 @@
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -7,10 +8,23 @@ __pycache__/
 dist/
 build/
 .eggs/
-.env
-.venv
-env/
+
+# Virtual environments
+.venv/
 venv/
-.pytest_cache/
-.coverage
-htmlcov/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project artifacts
+*.onnx
+*.trt
+*.engine
